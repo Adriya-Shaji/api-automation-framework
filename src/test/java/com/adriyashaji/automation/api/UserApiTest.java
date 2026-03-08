@@ -1,5 +1,6 @@
 package com.adriyashaji.automation.api;
 
+import com.adriyashaji.automation.base.BaseTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -11,16 +12,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import com.adriyashaji.automation.base.BaseTest;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public final class UserApiTest {
-    @BeforeAll
-    static void setup() {
-        System.setProperty("java.net.preferIPv4Stack", "true");
-        RestAssured.baseURI = "http://localhost:3000";
-      //  RestAssured.baseURI = "https://jsonplaceholder.typicode";
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-    }
+public class UserApiTest extends BaseTest {
 
     @Test
     @Order(1)

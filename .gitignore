@@ -20,3 +20,6 @@ config-uat.properties
 # OS files
 .DS_Store
 Thumbs.db
+
+#Claude file
+.claude/

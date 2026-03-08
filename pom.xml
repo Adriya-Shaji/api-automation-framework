@@ -52,6 +52,12 @@
             <version>${allure.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>3.3.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins> <!-- Runs JUnit 5 tests -->
