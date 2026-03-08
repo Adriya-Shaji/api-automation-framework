@@ -1,0 +1,65 @@
+{
+  "users": [
+    {
+      "id": "2",
+      "name": "Ervin Howell",
+      "username": "Antonette",
+      "email": "shanna@melissa.tv"
+    },
+    {
+      "id": "3",
+      "name": "Clementine Bauch",
+      "username": "Samantha",
+      "email": "nathan@yesenia.net"
+    },
+    {
+      "id": "4",
+      "name": "Patricia Lebsack",
+      "username": "Karianne",
+      "email": "julianne@kory.org"
+    },
+    {
+      "id": "5",
+      "name": "Chelsey Dietrich",
+      "username": "Kamren",
+      "email": "lucio@annie.ca"
+    },
+    {
+      "id": "f75f",
+      "name": "Janet QA",
+      "username": "janetqa",
+      "email": "janet@test.com"
+    },
+    {
+      "id": "912f",
+      "name": "Test User",
+      "username": "testuser",
+      "email": "test@test.com"
+    },
+    {
+      "id": "4c87",
+      "name": "Janet QA",
+      "username": "janetqa",
+      "email": "janet@test.com"
+    },
+    {
+      "id": "a814",
+      "name": "Test User",
+      "username": "testuser",
+      "email": "test@test.com"
+    },
+    {
+      "id": "7dc3",
+      "name": "Janet QA",
+      "username": "janetqa",
+      "email": "janet@test.com"
+    },
+    {
+      "id": "34a7",
+      "name": "Test User",
+      "username": "testuser",
+      "email": "test@test.com"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
