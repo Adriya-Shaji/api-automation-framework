@@ -1,10 +1,7 @@
 package com.adriyashaji.automation.api;
 
 import com.adriyashaji.automation.base.BaseTest;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import org.hamcrest.text.IsEmptyString;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,7 +9,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.adriyashaji.automation.base.BaseTest;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserApiTest extends BaseTest {
@@ -22,7 +18,7 @@ public class UserApiTest extends BaseTest {
     @Tag("smoke")
     @DisplayName("GET all users returns 200 with data array")
     void getAllUsers() {
-        given().log().all()
+        given(requestSpec)
                 .when()
                 .get("/users")
                 .then().log().all()
@@ -37,7 +33,7 @@ public class UserApiTest extends BaseTest {
     @Tag("smoke")
     @DisplayName("GET single user by valid ID returns 200")
     void getSingleUser() {
-        given()
+        given(requestSpec)
                 .when().get("/users/1")
                 .then()
                 .statusCode(200)
@@ -52,7 +48,7 @@ public class UserApiTest extends BaseTest {
     @Tag("regression")
     @DisplayName("GET non-existant user returns 404")
     void getUserNotFound() {
-        given()
+        given(requestSpec)
                 .when().get("/users/9999")
                 .then()
                 .statusCode(404);
@@ -67,7 +63,7 @@ public class UserApiTest extends BaseTest {
     })
     @Tag("regression")
     void getUserParameterized(int id, int expectedStatus) {
-        given()
+        given(requestSpec)
                 .when().get("/users/" + id)
                 .then()
                 .statusCode(expectedStatus);
@@ -80,8 +76,7 @@ public class UserApiTest extends BaseTest {
     void createUser() {
         String requestBody = "{\"name\": \"Janet QA\", \"username\": \"janetqa\", \"email\": \"janet@test.com\"}";
 
-        given()
-                .contentType(ContentType.JSON)
+        given(requestSpec)
                 .body(requestBody)
                 .when().post("/users")
                 .then()
@@ -98,8 +93,7 @@ public class UserApiTest extends BaseTest {
     void extractCreatedUserId() {
         String requestBody = "{\"name\": \"Test User\", \"username\": \"testuser\", \"email\": \"test@test.com\"}";
 
-        String id = given()
-                .contentType(ContentType.JSON)
+        String id = given(requestSpec)
                 .body(requestBody)
                 .when().post("/users")
                 .then()
@@ -116,8 +110,7 @@ public class UserApiTest extends BaseTest {
     void updateUser() {
         String requestBody = "{\"name\": \"Janet Updated\", \"username\": \"janetupdated\", \"email\": \"janet.updated@test.com\"}";
 
-        given()
-                .contentType(ContentType.JSON)
+        given(requestSpec)
                 .body(requestBody)
                 .when().put("/users/1")
                 .then().statusCode(200)
@@ -130,7 +123,7 @@ public class UserApiTest extends BaseTest {
     @Tag("regression")
     @DisplayName("DELETE user returns 200")
     void deleteUser() {
-        given()
+        given(requestSpec)
                 .when().delete("/users/1")
                 .then()
                 .statusCode(200);
