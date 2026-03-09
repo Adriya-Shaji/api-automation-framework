@@ -2,6 +2,7 @@ package com.adriyashaji.automation.base;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.adriyashaji.automation.utils.ConfigReader;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +19,7 @@ public class BaseTest {
         wireMockServer.start();
         configureFor("localhost", 8080);
 
-        RestAssured.baseURI = "http://localhost:8080";
+        RestAssured.baseURI = ConfigReader.get("base.url");
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
         setupStubs();
