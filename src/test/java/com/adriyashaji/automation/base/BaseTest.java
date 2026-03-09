@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.qameta.allure.restassured.AllureRestAssured;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -30,6 +31,7 @@ public class BaseTest {
                 .setBaseUri(ConfigReader.get("base.url"))
                 .setContentType(ContentType.JSON)
                 .addHeader("Accept", "application/json")
+                .addFilter(new AllureRestAssured())
                 .build();
 
         setupStubs();
