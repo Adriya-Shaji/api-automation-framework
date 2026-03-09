@@ -10,6 +10,7 @@ A professional REST API test automation framework built with Java, RestAssured a
 | JUnit5 | Test runner and Assertions |
 | AssertJ | Fluent assertions |
 | Jackson | JSON serialisation |
+| WireMock | In-process mock server |
 | PostgreSQL + JDBC | Database validation |
 | Allure | Test reporting |
 | Jenkins | CI/CD |
@@ -19,19 +20,21 @@ A professional REST API test automation framework built with Java, RestAssured a
 src/test/java/com/adriyashaji/automation
 
 ├── base/
-│   ├── BaseTest.java         # Parent class - shared RequestSpec, ResponseSpec
-│   ├── ConfigReader.java     # Loads environment specific properties
-│   ├── AuthManager.java      # Bearer token management
+│   ├── BaseTest.java          # Parent class - shared RequestSpec, ResponseSpec
+│   ├──AuthManager.java        # Bearer token management
+│
+├── utils/
+│   └── ConfigReader.java     # Loads environment specific properties
 │
 ├── api/
-│   ├── UserApiTest.java      # User endpoint tests
-│   ├── FilmApiTest.java      # Film endpoint tests
+│   ├── UserApiTest.java       # User endpoint tests
+│   ├── FilmApiTest.java       # Film endpoint tests
 │
 └── db/
-    ├── DatabaseHelper.java   # JDBC Utility for DB validation
+    └── DatabaseHelper.java    # JDBC Utility for DB validation
 
 src/test/resources/
-├── config.properties         # Environment config (gitignored)
+├── config.properties           # Environment config (gitignored)
 └── schemas/
      └──user-schema.json      # JSON schema for contract testing
 ````
