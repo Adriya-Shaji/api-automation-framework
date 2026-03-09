@@ -7,6 +7,10 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
+import io.restassured.specification.RequestSpecification;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class BaseTest {
@@ -22,6 +26,12 @@ public class BaseTest {
         RestAssured.baseURI = ConfigReader.get("base.url");
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
+        requestSpec = new RequestSpecBuilder()
+                .setBaseUri(ConfigReader.get("base.url"))
+                .setContentType(ContentType.JSON)
+                .addHeader("Accept", "application/json")
+                .build();
+
         setupStubs();
     }
 
@@ -29,6 +39,8 @@ public class BaseTest {
     static void teardown() {
         wireMockServer.stop();
     }
+
+    protected static RequestSpecification requestSpec;
 
     private static void setupStubs() {
 
