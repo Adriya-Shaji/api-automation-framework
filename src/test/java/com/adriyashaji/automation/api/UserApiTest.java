@@ -9,9 +9,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserApiTest extends BaseTest {
+
 
     @Test
     @Order(1)
@@ -30,6 +32,19 @@ public class UserApiTest extends BaseTest {
 
     @Test
     @Order(2)
+    @Tag("regression")
+    @DisplayName("GET single user matches json schema")
+    void getUserMatchesSchema(){
+        given(requestSpec)
+                .when()
+                .get("/users/1")
+                .then()
+                .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("schemas/user-schema.json"));
+    }
+
+    @Test
+    @Order(3)
     @Tag("smoke")
     @DisplayName("GET single user by valid ID returns 200")
     void getSingleUser() {
@@ -44,7 +59,7 @@ public class UserApiTest extends BaseTest {
 
 
     @Test
-    @Order(3)
+    @Order(4)
     @Tag("regression")
     @DisplayName("GET non-existant user returns 404")
     void getUserNotFound() {
@@ -70,7 +85,7 @@ public class UserApiTest extends BaseTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     @Tag("smoke")
     @DisplayName("POST create user returns 201 with generated ID")
     void createUser() {
@@ -87,7 +102,7 @@ public class UserApiTest extends BaseTest {
 
 
     @Test
-    @Order(5)
+    @Order(6)
     @Tag("regression")
     @DisplayName("POST create user and extract generated id")
     void extractCreatedUserId() {
@@ -104,7 +119,7 @@ public class UserApiTest extends BaseTest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     @Tag("regression")
     @DisplayName("PUT update user returns 200 with updated data")
     void updateUser() {
@@ -119,7 +134,7 @@ public class UserApiTest extends BaseTest {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     @Tag("regression")
     @DisplayName("DELETE user returns 200")
     void deleteUser() {
