@@ -13,6 +13,7 @@ import io.restassured.http.ContentType;
 import io.qameta.allure.restassured.AllureRestAssured;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 
 public class BaseTest {
 
@@ -84,5 +85,28 @@ public class BaseTest {
         // DELETE user
         stubFor(delete(urlEqualTo("/users/1"))
                 .willReturn(aResponse().withStatus(200)));
+
+
+        // Login endpoint - returns a token when correct credentials sent
+        stubFor(post(urlEqualTo("/login"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"token\": \"test-bearer-token-123\" }")));
+
+        // Protected endpoint - valid token returns 200
+        stubFor(get(urlEqualTo("/secure/users"))
+                .withHeader("Authorization", equalTo("Bearer test-bearer-token-123"))
+                .willReturn(okJson("{ \"users\": [{ \"id\": \"1\", \"name\": \"Leanne Graham\" }] }")));
+
+        // No token - 401
+        stubFor(get(urlEqualTo("/secure/users"))
+                .withHeader("Authorization", absent())
+                .willReturn(aResponse().withStatus(401)));
+
+        // Wrong token - 403
+        stubFor(get(urlEqualTo("/secure/users"))
+                .withHeader("Authorization", equalTo("Bearer wrong-token"))
+                .willReturn(aResponse().withStatus(403)));
     }
 }
