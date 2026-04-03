@@ -108,5 +108,32 @@ public class BaseTest {
         stubFor(get(urlEqualTo("/secure/users"))
                 .withHeader("Authorization", equalTo("Bearer wrong-token"))
                 .willReturn(aResponse().withStatus(403)));
+
+        // Films endpoints
+        stubFor(get(urlEqualTo("/films"))
+                .willReturn(okJson("[{ \"id\": \"1\", \"title\": \"Inception\", \"director\": \"Christopher Nolan\", \"year\": 2010 }," +
+                        "{ \"id\": \"2\", \"title\": \"The Dark Knight\", \"director\": \"Christopher Nolan\", \"year\": 2008 }," +
+                        "{ \"id\": \"3\", \"title\": \"Interstellar\", \"director\": \"Christopher Nolan\", \"year\": 2014 }]")));
+
+        stubFor(get(urlEqualTo("/films/1"))
+                .willReturn(okJson("{ \"id\": \"1\", \"title\": \"Inception\", \"director\": \"Christopher Nolan\", \"year\": 2010 }")));
+
+        stubFor(get(urlEqualTo("/films/2"))
+                .willReturn(okJson("{ \"id\": \"2\", \"title\": \"The Dark Knight\", \"director\": \"Christopher Nolan\", \"year\": 2008 }")));
+
+        stubFor(get(urlEqualTo("/films/9999"))
+                .willReturn(aResponse().withStatus(404)));
+
+        stubFor(post(urlEqualTo("/films"))
+                .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"4\", \"title\": \"Inception\", \"director\": \"Christopher Nolan\", \"year\": 2017 }")));
+
+        stubFor(put(urlEqualTo("/films/1"))
+                .willReturn(okJson("{ \"id\": \"1\", \"title\": \"Inception updated\", \"director\": \"Christopher Nolan\", \"year\": 2010 }")));
+
+        stubFor(delete(urlEqualTo("/films/1"))
+                .willReturn(aResponse().withStatus(200)));
     }
 }

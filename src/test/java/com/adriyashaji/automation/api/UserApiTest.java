@@ -2,6 +2,7 @@ package com.adriyashaji.automation.api;
 
 import com.adriyashaji.automation.base.BaseTest;
 
+import com.adriyashaji.automation.models.User;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -84,15 +85,16 @@ public class UserApiTest extends BaseTest {
                 .statusCode(expectedStatus);
     }
 
+
     @Test
     @Order(5)
     @Tag("smoke")
     @DisplayName("POST create user returns 201 with generated ID")
     void createUser() {
-        String requestBody = "{\"name\": \"Janet QA\", \"username\": \"janetqa\", \"email\": \"janet@test.com\"}";
+        User user = new User("Janet QA", "janetqa", "janet@test.com");
 
         given(requestSpec)
-                .body(requestBody)
+                .body(user)
                 .when().post("/users")
                 .then()
                 .statusCode(201)
@@ -106,10 +108,10 @@ public class UserApiTest extends BaseTest {
     @Tag("regression")
     @DisplayName("POST create user and extract generated id")
     void extractCreatedUserId() {
-        String requestBody = "{\"name\": \"Test User\", \"username\": \"testuser\", \"email\": \"test@test.com\"}";
+        User user = new User("Test User", "testuser", "test@test.com");
 
         String id = given(requestSpec)
-                .body(requestBody)
+                .body(user)
                 .when().post("/users")
                 .then()
                 .statusCode(201)
@@ -123,10 +125,10 @@ public class UserApiTest extends BaseTest {
     @Tag("regression")
     @DisplayName("PUT update user returns 200 with updated data")
     void updateUser() {
-        String requestBody = "{\"name\": \"Janet Updated\", \"username\": \"janetupdated\", \"email\": \"janet.updated@test.com\"}";
+        User user = new User("Janet Updated", "janetupdated", "janet.updated@test.com");
 
         given(requestSpec)
-                .body(requestBody)
+                .body(user)
                 .when().put("/users/1")
                 .then().statusCode(200)
                 .body("name", equalTo("Janet Updated"))
