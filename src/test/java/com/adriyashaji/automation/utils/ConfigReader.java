@@ -6,19 +6,21 @@ import java.util.Properties;
 
 public class ConfigReader {
 
-    private static Properties properties;
+    private static final Properties properties = new Properties();
 
     static {
-        try {
-            properties = new Properties();
-            FileInputStream fis = new FileInputStream(
-                    "src/test/resources/config.properties"
-            );
+        // Read -Denv=staging from Maven command. Default to "local" if not passed.
+        String env = System.getProperty("env", "local");
+
+        // Constructs the file path dynamically
+        String filePath = "src/test/resources/config/" + env + ".properties";
+
+        try (FileInputStream fis = new FileInputStream(filePath)) {
             properties.load(fis);
         } catch (IOException e) {
             throw new RuntimeException(
-                    "config.properties not found in src/test/resources. " +
-                            "Make sure the file exists before running tests.", e
+                    "Could not load config for env = " + env + '.'
+                            + "\n Expected file at: " + filePath, e
             );
         }
     }
@@ -27,9 +29,13 @@ public class ConfigReader {
         String value = properties.getProperty(key);
         if (value == null) {
             throw new RuntimeException(
-                    "Property '" + key + "' not found in config.properties"
+                    "Property '" + key + "' not found in active config file."
             );
         }
         return value;
     }
 }
+
+
+
+
