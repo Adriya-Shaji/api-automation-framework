@@ -92,21 +92,24 @@ public class DatabaseHelper {
         }
     }
 
-    // Checks if payment_date falls within expected window — the timestamp check
+    // Timestamp window check — catches silent failures where payment exists
+    // but date field is wrong (epoch 0, future-dated, clock skew).
+    // DATEADD is H2-specific. PostgreSQL equivalent: NOW() - INTERVAL '? seconds'
     public boolean paymentExistsWithinTimeWindow(int paymentId, int bufferSeconds) throws SQLException{
         String sql = "SELECT COUNT(*) FROM payments " +
                     "WHERE payment_id = ? " +
                     "AND payment_date BETWEEN " +
                     "DATEADD('SECOND', -?, NOW()) AND DATEADD('SECOND', ?, NOW())";
 
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, paymentId);
-        ps.setInt(2, bufferSeconds);
-        ps.setInt(3, bufferSeconds);
+        try(PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, paymentId);
+            ps.setInt(2, bufferSeconds);
+            ps.setInt(3, bufferSeconds);
 
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        return rs.getInt(1) > 0;
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
     }
 
 
