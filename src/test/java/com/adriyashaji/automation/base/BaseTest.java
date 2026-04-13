@@ -71,12 +71,21 @@ public class BaseTest {
         stubFor(get(urlEqualTo("/users/9999"))
                 .willReturn(aResponse().withStatus(404)));
 
-        // POST create user
+        // Valid - name exists AND is not blank
         stubFor(post(urlEqualTo("/users"))
+                .withRequestBody(matchingJsonPath("$[?(@.name != '')]"))
                 .willReturn(aResponse()
                         .withStatus(201)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"id\": \"6\", \"name\": \"Janet QA\", \"username\": \"janetqa\", \"email\": \"janet@test.com\" }")));
+                        .withBody("{ \"id\": \"6\", \"name\": \"Janet QA\", \"email\": \"janet@test.com\" }")));
+
+        // Invalid - name is blank or missing
+        stubFor(post(urlEqualTo("/users"))
+                .withRequestBody(matchingJsonPath("$[?(@.name == '')]"))
+                .willReturn(aResponse()
+                        .withStatus(400)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"error\": \"name is required\" }")));
 
         // PUT update user
         stubFor(put(urlEqualTo("/users/1"))

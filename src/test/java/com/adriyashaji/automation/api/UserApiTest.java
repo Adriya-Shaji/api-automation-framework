@@ -122,6 +122,21 @@ public class UserApiTest extends BaseTest {
 
     @Test
     @Order(7)
+    @DisplayName("POST with missing name returns 400")
+    void createUserWithMissingNameReturns400() {
+        // sending user with no name — blank string
+        User invalidUser = new User("", "janetqa", "janet@test.com");
+
+        given(requestSpec)
+                .body(invalidUser)
+                .when().post("/users")
+                .then()
+                .statusCode(400)
+                .body("error", equalTo("name is required"));
+    }
+
+    @Test
+    @Order(8)
     @Tag("regression")
     @DisplayName("PUT update user returns 200 with updated data")
     void updateUser() {
@@ -136,7 +151,7 @@ public class UserApiTest extends BaseTest {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     @Tag("regression")
     @DisplayName("DELETE user returns 200")
     void deleteUser() {
