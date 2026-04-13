@@ -1,59 +1,114 @@
 package com.adriyashaji.automation.utils;
 
-import org.junit.jupiter.api.AfterAll;
-
 import java.sql.*;
 
 public class DatabaseHelper {
     private Connection connection;
 
-    public DatabaseHelper() throws SQLException {
-        connection = DriverManager.getConnection(
-                "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1",
-                "sa",
-                ""
-        );
+    public DatabaseHelper(String url, String user, String password) throws SQLException {
+        connection = DriverManager.getConnection(url, user, password );
+
         createTestData();
     }
 
-    private void createTestData() throws SQLException {
-        //Create table - users
+
+        // Sets up the H2 in-memory table + seed data
+        // MERGE = insert if not exists, update if exists
+        private void createTestData() throws SQLException {
+        // Create table - users -schema structure
         connection.createStatement().execute(
                 "CREATE TABLE IF NOT EXISTS users " +
                         "(id INT PRIMARY KEY, name VARCHAR(100), email VARCHAR(100))"
         );
 
-        //Inserts/Merges user 1
+        // Inserts/Merges user 1 - test data
         connection.createStatement().execute(
                 "MERGE INTO users VALUES (1, 'Adriya Shaji', 'adriya@test.com')"
         );
 
-        //Inserts/Merges user 2
+        // Inserts/Merges user 2
         connection.createStatement().execute(
                 "MERGE INTO users VALUES (2, 'John Doe', 'john@test.com')"
         );
+
+        // Create Payments table
+        connection.createStatement().execute(
+                    "CREATE TABLE IF NOT EXISTS payments " +
+                            "(payment_id INT PRIMARY KEY, " +
+                            " customer_id INT, " +
+                            " amount DECIMAL(10,2), " +
+                            " payment_date TIMESTAMP)"
+        );
+
+        // Seed one payment
+        // NOW() = current timestamp at test startup — mirrors a real write
+        connection.createStatement().execute(
+                "MERGE INTO payments VALUES " +
+                        "(101, 1, 99.99, NOW())"
+        );
     }
 
+
     public int getRowCount(String tableName) throws SQLException{
-        PreparedStatement ps = connection.prepareStatement(
-                "SELECT COUNT (*)  FROM " + tableName
-        );
+        String sql = "SELECT COUNT (*)  FROM " + tableName;
+        PreparedStatement ps = connection.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         rs.next();
         return rs.getInt(1);
     }
 
-    public boolean recordExists(String tableName, String column, String value)
-        throws SQLException {
-        PreparedStatement ps = connection.prepareStatement(
-                "SELECT COUNT (*) FROM " + tableName + " WHERE "
-                        + column + " = ?"
-        );
-        ps.setString(1, value);
+
+    public boolean userRecordExists(String tableName, String column, String value) throws SQLException {
+        String sql = "SELECT COUNT (*) FROM " + tableName + " WHERE "
+                + column + " = ?";
+
+        try(PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, value);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
+    }
+
+
+    public boolean validatePayment(int paymentId, double expectedAmount,
+                                   int expectedCustomerId) throws SQLException{
+
+        String sql = "SELECT COUNT(*) FROM payments p " +
+                    "INNER JOIN users u ON p.customer_id = u.id " +
+                    "WHERE p.payment_id = ? " +
+                    "AND p.amount = ? " +
+                    "AND p.customer_id = ?";
+
+        try(PreparedStatement ps = connection.prepareStatement(sql)){
+            ps.setInt(1, paymentId);
+            ps.setDouble(2, expectedAmount);
+            ps.setInt(3, expectedCustomerId);
+
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            //exactly 1 row = payment is valid
+            return rs.getInt(1) > 0;
+        }
+    }
+
+    // Checks if payment_date falls within expected window — the timestamp check
+    public boolean paymentExistsWithinTimeWindow(int paymentId, int bufferSeconds) throws SQLException{
+        String sql = "SELECT COUNT(*) FROM payments " +
+                    "WHERE payment_id = ? " +
+                    "AND payment_date BETWEEN " +
+                    "DATEADD('SECOND', -?, NOW()) AND DATEADD('SECOND', ?, NOW())";
+
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setInt(1, paymentId);
+        ps.setInt(2, bufferSeconds);
+        ps.setInt(3, bufferSeconds);
+
         ResultSet rs = ps.executeQuery();
         rs.next();
         return rs.getInt(1) > 0;
     }
+
 
     public void close() throws SQLException {
         if (connection !=null)
