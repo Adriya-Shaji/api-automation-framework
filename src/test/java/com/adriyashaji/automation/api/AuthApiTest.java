@@ -2,11 +2,13 @@ package com.adriyashaji.automation.api;
 
 import com.adriyashaji.automation.base.BaseTest;
 import com.adriyashaji.automation.utils.AuthManager;
-import io.restassured.RestAssured;
+import com.adriyashaji.automation.utils.ConfigReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -26,8 +28,10 @@ public class AuthApiTest extends BaseTest {
     @DisplayName("POST login returns 200 with valid token")
     void loginReturnsToken() {
         given(requestSpec)
-                .body("{ \"username\": \"adriya\", \"password\": \"secret123\" }")
-                .when()
+                .body(Map.of(
+                        "username", ConfigReader.get("auth.username"),
+                        "password", ConfigReader.get("auth.password")
+                ))                .when()
                 .post("/login")
                 .then()
                 .statusCode(200)

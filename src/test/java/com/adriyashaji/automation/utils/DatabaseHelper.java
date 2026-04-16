@@ -51,10 +51,12 @@ public class DatabaseHelper {
 
     public int getRowCount(String tableName) throws SQLException{
         String sql = "SELECT COUNT (*)  FROM " + tableName;
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        return rs.getInt(1);
+
+        try(PreparedStatement ps = connection.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        }
     }
 
 

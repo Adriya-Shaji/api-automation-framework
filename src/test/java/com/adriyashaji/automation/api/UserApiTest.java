@@ -3,6 +3,7 @@ package com.adriyashaji.automation.api;
 import com.adriyashaji.automation.base.BaseTest;
 
 import com.adriyashaji.automation.models.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -90,9 +91,8 @@ public class UserApiTest extends BaseTest {
     @Order(5)
     @Tag("smoke")
     @DisplayName("POST create user returns 201 with generated ID")
-    void createUser() {
+    void createUser() throws JsonProcessingException {
         User user = new User("Janet QA", "janetqa", "janet@test.com");
-
         given(requestSpec)
                 .body(user)
                 .when().post("/users")
@@ -132,7 +132,7 @@ public class UserApiTest extends BaseTest {
                 .when().post("/users")
                 .then()
                 .statusCode(400)
-                .body("error", equalTo("name is required"));
+                .body("error", equalTo("name, username and email are required"));
     }
 
     @Test
