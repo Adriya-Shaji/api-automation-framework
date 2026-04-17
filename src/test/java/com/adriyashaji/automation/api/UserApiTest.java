@@ -3,6 +3,7 @@ package com.adriyashaji.automation.api;
 import com.adriyashaji.automation.base.BaseTest;
 
 import com.adriyashaji.automation.models.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,16 +13,13 @@ import static org.hamcrest.Matchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserApiTest extends BaseTest {
 
-
     @Test
-    @Order(1)
     @Tag("smoke")
     @DisplayName("GET all users returns 200 with data array")
     void getAllUsers() {
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .when()
                 .get("/users")
                 .then().log().all()
@@ -32,11 +30,10 @@ public class UserApiTest extends BaseTest {
 
 
     @Test
-    @Order(2)
     @Tag("regression")
     @DisplayName("GET single user matches json schema")
     void getUserMatchesSchema(){
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .when()
                 .get("/users/1")
                 .then()
@@ -45,11 +42,10 @@ public class UserApiTest extends BaseTest {
     }
 
     @Test
-    @Order(3)
     @Tag("smoke")
     @DisplayName("GET single user by valid ID returns 200")
     void getSingleUser() {
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .when().get("/users/1")
                 .then()
                 .statusCode(200)
@@ -60,11 +56,10 @@ public class UserApiTest extends BaseTest {
 
 
     @Test
-    @Order(4)
     @Tag("regression")
-    @DisplayName("GET non-existant user returns 404")
+    @DisplayName("GET non-existent user returns 404")
     void getUserNotFound() {
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .when().get("/users/9999")
                 .then()
                 .statusCode(404);
@@ -79,7 +74,7 @@ public class UserApiTest extends BaseTest {
     })
     @Tag("regression")
     void getUserParameterized(int id, int expectedStatus) {
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .when().get("/users/" + id)
                 .then()
                 .statusCode(expectedStatus);
@@ -87,13 +82,11 @@ public class UserApiTest extends BaseTest {
 
 
     @Test
-    @Order(5)
     @Tag("smoke")
     @DisplayName("POST create user returns 201 with generated ID")
-    void createUser() {
+    void createUser() throws JsonProcessingException {
         User user = new User("Janet QA", "janetqa", "janet@test.com");
-
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .body(user)
                 .when().post("/users")
                 .then()
@@ -104,13 +97,12 @@ public class UserApiTest extends BaseTest {
 
 
     @Test
-    @Order(6)
     @Tag("regression")
     @DisplayName("POST create user and extract generated id")
     void extractCreatedUserId() {
         User user = new User("Test User", "testuser", "test@test.com");
 
-        String id = given(requestSpec)
+        String id = given().spec(getRequestSpec())
                 .body(user)
                 .when().post("/users")
                 .then()
@@ -121,28 +113,26 @@ public class UserApiTest extends BaseTest {
     }
 
     @Test
-    @Order(7)
     @DisplayName("POST with missing name returns 400")
     void createUserWithMissingNameReturns400() {
         // sending user with no name — blank string
         User invalidUser = new User("", "janetqa", "janet@test.com");
 
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .body(invalidUser)
                 .when().post("/users")
                 .then()
                 .statusCode(400)
-                .body("error", equalTo("name is required"));
+                .body("error", equalTo("name, username and email are required"));
     }
 
     @Test
-    @Order(8)
     @Tag("regression")
     @DisplayName("PUT update user returns 200 with updated data")
     void updateUser() {
         User user = new User("Janet Updated", "janetupdated", "janet.updated@test.com");
 
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .body(user)
                 .when().put("/users/1")
                 .then().statusCode(200)
@@ -151,11 +141,10 @@ public class UserApiTest extends BaseTest {
     }
 
     @Test
-    @Order(9)
     @Tag("regression")
     @DisplayName("DELETE user returns 200")
     void deleteUser() {
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .when().delete("/users/1")
                 .then()
                 .statusCode(200);

@@ -1,9 +1,19 @@
 package com.adriyashaji.automation.utils;
 
 import java.sql.*;
+import java.util.Set;
 
 public class DatabaseHelper {
     private Connection connection;
+
+    private static final Set<String> ALLOWED_TABLES = Set.of("users", "payments");
+    private static final Set<String> ALLOWED_COLUMNS = Set.of("id", "name", "email", "customer_id", "payment_id", "amount");
+
+    private void validateIdentifier(String value, Set<String> allowed, String type) {
+        if (!allowed.contains(value.toLowerCase())) {
+            throw new IllegalArgumentException("Invalid " + type + ": " + value);
+        }
+    }
 
     public DatabaseHelper(String url, String user, String password) throws SQLException {
         connection = DriverManager.getConnection(url, user, password );
@@ -49,20 +59,23 @@ public class DatabaseHelper {
     }
 
 
-    public int getRowCount(String tableName) throws SQLException{
-        String sql = "SELECT COUNT (*)  FROM " + tableName;
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        return rs.getInt(1);
+    public int getRowCount(String tableName) throws SQLException {
+        validateIdentifier(tableName, ALLOWED_TABLES, "table");
+        String sql = "SELECT COUNT(*) FROM " + tableName;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        }
     }
 
 
-    public boolean userRecordExists(String tableName, String column, String value) throws SQLException {
-        String sql = "SELECT COUNT (*) FROM " + tableName + " WHERE "
-                + column + " = ?";
-
-        try(PreparedStatement ps = connection.prepareStatement(sql)) {
+    public boolean userRecordExists(String tableName, String column,
+                                    String value) throws SQLException {
+        validateIdentifier(tableName, ALLOWED_TABLES, "table");
+        validateIdentifier(column, ALLOWED_COLUMNS, "column");
+        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE " + column + " = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, value);
             ResultSet rs = ps.executeQuery();
             rs.next();
