@@ -20,7 +20,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class BaseTest {
 
     protected static WireMockServer wireMockServer;
-    protected static RequestSpecification requestSpec;
+    private static RequestSpecification requestSpec;
+
+    protected static RequestSpecification getRequestSpec() {
+        return requestSpec;
+    }
 
     @BeforeAll
     static void setup() {
