@@ -3,6 +3,8 @@ package com.adriyashaji.automation.utils;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
+import java.util.Map;
+
 public class AuthManager {
 
     //cachedToken - one token shared across entire test run
@@ -10,10 +12,23 @@ public class AuthManager {
 
     public static String getToken() {
         if (cachedToken == null) {
+            String username = System.getenv("AUTH_USERNAME") != null
+                    ? System.getenv("AUTH_USERNAME")
+                    : ConfigReader.get("auth.username");
+
+            String password = System.getenv("AUTH_PASSWORD") != null
+                    ? System.getenv("AUTH_PASSWORD")
+                    : ConfigReader.get("auth.password");
+
+            Map<String, String> credentials = Map.of(
+                    "username", username,
+                    "password", password
+            );
+
             cachedToken = RestAssured
                     .given()
                     .contentType(ContentType.JSON)
-                    .body("{ \"username\": \"adriya\", \"password\": \"secret123\" }")
+                    .body(credentials)
                     .when()
                     .post("/login")
                     .then()

@@ -2,11 +2,13 @@ package com.adriyashaji.automation.api;
 
 import com.adriyashaji.automation.base.BaseTest;
 import com.adriyashaji.automation.utils.AuthManager;
-import io.restassured.RestAssured;
+import com.adriyashaji.automation.utils.ConfigReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -25,9 +27,11 @@ public class AuthApiTest extends BaseTest {
     @Test
     @DisplayName("POST login returns 200 with valid token")
     void loginReturnsToken() {
-        given(requestSpec)
-                .body("{ \"username\": \"adriya\", \"password\": \"secret123\" }")
-                .when()
+        given().spec(getRequestSpec())
+                .body(Map.of(
+                        "username", ConfigReader.get("auth.username"),
+                        "password", ConfigReader.get("auth.password")
+                ))                .when()
                 .post("/login")
                 .then()
                 .statusCode(200)
@@ -39,7 +43,7 @@ public class AuthApiTest extends BaseTest {
     void authenticatedRequestReturns200() {
         String token = AuthManager.getToken();
 
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("/secure/users")
@@ -50,7 +54,7 @@ public class AuthApiTest extends BaseTest {
     @Test
     @DisplayName("GET secure endpoint with no token returns 401")
     void noTokenReturns401() {
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .when()
                 .get("/secure/users")
                 .then()
@@ -60,7 +64,7 @@ public class AuthApiTest extends BaseTest {
     @Test
     @DisplayName("GET secure endpoint with wrong token returns 403")
     void wrongTokenReturns403() {
-        given(requestSpec)
+        given().spec(getRequestSpec())
                 .header("Authorization", "Bearer wrong-token")
                 .when()
                 .get("/secure/users")
