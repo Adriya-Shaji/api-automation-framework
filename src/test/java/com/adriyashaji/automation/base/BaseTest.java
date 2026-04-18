@@ -28,15 +28,17 @@ public class BaseTest {
 
     @BeforeAll
     static void setup() {
-        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8080));
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
         wireMockServer.start();
-        configureFor("localhost", 8080);
+        configureFor("localhost", wireMockServer.port());
 
-        RestAssured.baseURI = ConfigReader.get("base.url");
+        String baseUrl = "http://localhost:" + wireMockServer.port();
+
+        RestAssured.baseURI = baseUrl;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
         requestSpec = new RequestSpecBuilder()
-                .setBaseUri(ConfigReader.get("base.url"))
+                .setBaseUri(baseUrl)
                 .setContentType(ContentType.JSON)
                 .addHeader("Accept", "application/json")
                 .addFilter(new AllureRestAssured())

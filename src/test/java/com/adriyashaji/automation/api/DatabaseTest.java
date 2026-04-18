@@ -1,22 +1,25 @@
 package com.adriyashaji.automation.api;
 
 
+import com.adriyashaji.automation.utils.ConfigReader;
 import com.adriyashaji.automation.utils.DatabaseHelper;
 import org.junit.jupiter.api.*;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 
 @DisplayName("Database validation tests")
 @Tag("database")
+// Standalone: no WireMock/HTTP dependency — pure DB validation.
 public class DatabaseTest {
     private static DatabaseHelper dbHelper;
 
     @BeforeAll
     static void setUp() throws SQLException {
         dbHelper = new DatabaseHelper(
-                "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1",
-                "sa",
-                ""
+                ConfigReader.get("db.url"),
+                ConfigReader.get("db.user"),
+                ConfigReader.get("db.password")
         );
     }
 
@@ -43,7 +46,7 @@ public class DatabaseTest {
     @Test
     @DisplayName("Payment record exists with correct amount and customer")
     void paymentIsValidInDatabase() throws SQLException{
-        boolean validPayment = dbHelper.validatePayment(101, 99.99, 1);
+        boolean validPayment = dbHelper.validatePayment(101, new BigDecimal("99.99"), 1);
 
         Assertions.assertTrue(validPayment,
         "Payment 101 not found or data mismatch — " +
