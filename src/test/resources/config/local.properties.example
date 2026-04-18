@@ -1,0 +1,8 @@
+# Copy this to local.properties and fill in your values
+# local.properties is gitignored — never commit real values
+auth.username=REPLACE_ME
+auth.password=REPLACE_ME
+base.url=http://localhost:8080
+db.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+db.user=sa
+db.password=
