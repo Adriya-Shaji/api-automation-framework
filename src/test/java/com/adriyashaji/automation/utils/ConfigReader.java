@@ -1,7 +1,7 @@
 package com.adriyashaji.automation.utils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class ConfigReader {
@@ -9,18 +9,26 @@ public class ConfigReader {
     private static final Properties properties = new Properties();
 
     static {
-        // Read -Denv=staging from Maven command. Default to "local" if not passed.
         String env = System.getProperty("env", "local");
 
-        // Constructs the file path dynamically
-        String filePath = "src/test/resources/config/" + env + ".properties";
+        // Classpath lookup — works in IDE, Maven, CI regardless of working directory
+        String resourcePath = "config/" + env + ".properties";
 
-        try (FileInputStream fis = new FileInputStream(filePath)) {
-            properties.load(fis);
+        try (InputStream is = ConfigReader.class.getClassLoader()
+                .getResourceAsStream(resourcePath)) {
+
+            if (is == null) {
+                throw new RuntimeException(
+                        "Config file not found on classpath: " + resourcePath
+                                + "\nExpected at: src/test/resources/" + resourcePath
+                );
+            }
+
+            properties.load(is);
+
         } catch (IOException e) {
             throw new RuntimeException(
-                    "Could not load config for env = " + env + '.'
-                            + "\n Expected file at: " + filePath, e
+                    "Failed to load config for env = " + env, e
             );
         }
     }
@@ -35,7 +43,3 @@ public class ConfigReader {
         return value;
     }
 }
-
-
-
-
