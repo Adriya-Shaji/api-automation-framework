@@ -7,40 +7,59 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class AuthStubs {
 
-    private static final String VALID_TOKEN = "test-bearer-token-123";
+    public static final String VALID_TOKEN = "test-bearer-token-123";
+    public static final String INVALID_TOKEN = "wrong-token";
     private static final String VALID_USERNAME = ConfigReader.get("auth.username");
     private static final String VALID_PASSWORD = ConfigReader.get("auth.password");
 
-    public static void register(WireMockServer wireMock) {
+            public static void register(WireMockServer wireMock) {
 
-        wireMock.stubFor(post(urlEqualTo("/login"))
-                .atPriority(2)
-                .withRequestBody(matchingJsonPath(
-                        "$[?(@.username == '" + VALID_USERNAME + "')]"))
-                .withRequestBody(matchingJsonPath(
-                        "$[?(@.password == '" + VALID_PASSWORD + "')]"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"token\": \"" + VALID_TOKEN + "\" }")));
+                // Valid credentials (specific JSON path matchers)
+                wireMock.stubFor(post(urlEqualTo("/login"))
+                        .atPriority(2)
+                        .withRequestBody(matchingJsonPath(
+                                "$[?(@.username == '" + VALID_USERNAME + "')]"))
+                        .withRequestBody(matchingJsonPath(
+                                "$[?(@.password == '" + VALID_PASSWORD + "')]"))
+                        .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{ \"token\": \"" + VALID_TOKEN + "\" }")));
 
-        // Valid token - checked first, most specific happy path
-        wireMock.stubFor(get(urlEqualTo("/secure/users"))
-                .atPriority(1)
-                .withHeader("Authorization", equalTo("Bearer " + VALID_TOKEN))
-                .willReturn(okJson(
-                        "{ \"users\": [{ \"id\": \"1\", \"name\": \"Leanne Graham\" }] }")));
+                // Catch-all: any login with wrong credentials falls through to here
+                wireMock.stubFor(post(urlEqualTo("/login"))
+                        .atPriority(5)
+                        .willReturn(aResponse()
+                                .withStatus(401)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{ \"error\": \"Invalid credentials\" }")));
 
-        // Wrong token - 403
-        wireMock.stubFor(get(urlEqualTo("/secure/users"))
-                .atPriority(2)
-                .withHeader("Authorization", equalTo("Bearer wrong-token"))
-                .willReturn(aResponse().withStatus(403)));
+                // Exact valid token - checked first, most specific happy path
+                wireMock.stubFor(get(urlEqualTo("/secure/users"))
+                        .atPriority(1)
+                        .withHeader("Authorization", equalTo("Bearer " + VALID_TOKEN))
+                        .willReturn(okJson(
+                                "{ \"users\": [{ \"id\": \"1\", \"name\": \"Leanne Graham\" }] }")));
 
-        // No token - 401
-        wireMock.stubFor(get(urlEqualTo("/secure/users"))
-                .atPriority(3)
-                .withHeader("Authorization", absent())
-                .willReturn(aResponse().withStatus(401)));
-    }
+                // Wrong/expired token - 403
+                wireMock.stubFor(get(urlEqualTo("/secure/users"))
+                        .atPriority(2)
+                        .withHeader("Authorization", equalTo("Bearer " + INVALID_TOKEN))
+                        .willReturn(aResponse().withStatus(403)));
+
+                // No token/authorization header - 401
+                wireMock.stubFor(get(urlEqualTo("/secure/users"))
+                        .atPriority(3)
+                        .withHeader("Authorization", absent())
+                        .willReturn(aResponse().withStatus(401)));
+
+                // Catch-all: any unrecognised/unknown token → 403
+                wireMock.stubFor(get(urlEqualTo("/secure/users"))
+                        .atPriority(5)
+                        .withHeader("Authorization", matching("Bearer .*"))
+                        .willReturn(aResponse()
+                                .withStatus(403)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{ \"error\": \"Invalid token\" }")));
+            }
 }
