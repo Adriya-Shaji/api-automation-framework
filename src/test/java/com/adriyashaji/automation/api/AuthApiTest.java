@@ -2,6 +2,7 @@ package com.adriyashaji.automation.api;
 
 import com.adriyashaji.automation.base.BaseTest;
 import com.adriyashaji.automation.utils.AuthManager;
+import com.adriyashaji.automation.stubs.AuthStubs;
 import com.adriyashaji.automation.utils.ConfigReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,14 +42,17 @@ public class AuthApiTest extends BaseTest {
     @Test
     @DisplayName("GET secure endpoint with valid token returns 200")
     void authenticatedRequestReturns200() {
-        String token = AuthManager.getToken();
+        String token = AuthManager.getToken(getRequestSpec());
 
         given().spec(getRequestSpec())
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("/secure/users")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("users", notNullValue())
+                .body("users[0].id", equalTo("1"))
+                .body("users[0].name", equalTo("Leanne Graham"));
     }
 
     @Test
@@ -65,10 +69,26 @@ public class AuthApiTest extends BaseTest {
     @DisplayName("GET secure endpoint with wrong token returns 403")
     void wrongTokenReturns403() {
         given().spec(getRequestSpec())
-                .header("Authorization", "Bearer wrong-token")
+                .header("Authorization", "Bearer " + AuthStubs.INVALID_TOKEN)
                 .when()
                 .get("/secure/users")
                 .then()
                 .statusCode(403);
+    }
+
+
+    @Test
+    @DisplayName("POST login with invalid credentials returns 401")
+    void invalidLoginReturns401() {
+        given().spec(getRequestSpec())
+                .body(Map.of(
+                        "username", "wrong-user",
+                        "password", "wrong-pass"
+                ))
+                .when()
+                .post("/login")
+                .then()
+                .statusCode(401)
+                .body("error", notNullValue());
     }
 }

@@ -1,16 +1,17 @@
 package com.adriyashaji.automation.utils;
 
-import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 
 import java.util.Map;
 
+import static io.restassured.RestAssured.given;
+
 public class AuthManager {
 
-    //cachedToken - one token shared across entire test run
     private static String cachedToken = null;
 
-    public static String getToken() {
+    public static String getToken(RequestSpecification spec) {
         if (cachedToken == null) {
             String username = System.getenv("AUTH_USERNAME") != null
                     ? System.getenv("AUTH_USERNAME")
@@ -25,9 +26,8 @@ public class AuthManager {
                     "password", password
             );
 
-            cachedToken = RestAssured
-                    .given()
-                    .contentType(ContentType.JSON)
+            cachedToken = given()
+                    .spec(spec)
                     .body(credentials)
                     .when()
                     .post("/login")
@@ -40,7 +40,6 @@ public class AuthManager {
         return cachedToken;
     }
 
-    // Sets cachedToken back to null. Useful if you ever need to force a fresh login
     public static void resetToken() {
         cachedToken = null;
     }
