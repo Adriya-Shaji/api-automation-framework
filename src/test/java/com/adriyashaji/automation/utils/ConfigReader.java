@@ -9,6 +9,7 @@ public class ConfigReader {
     private static final Properties properties = new Properties();
 
     static {
+        // See local.properties.example for setup instructions
         String env = System.getProperty("env", "local");
 
         // Classpath lookup — works in IDE, Maven, CI regardless of working directory
