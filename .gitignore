@@ -25,4 +25,4 @@ Thumbs.db
 .claude/
 
 # File with real credentials for local testing
-local-secrets.properties
+local-secrets.propertiessrc/test/resources/config/local.properties
