@@ -36,7 +36,7 @@ public class AuthApiTest extends BaseTest {
                 .post("/login")
                 .then()
                 .statusCode(200)
-                .body("token", notNullValue());
+                .body("token", equalTo(AuthStubs.VALID_TOKEN));
     }
 
     @Test

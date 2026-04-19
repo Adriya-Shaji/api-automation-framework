@@ -7,26 +7,29 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public class AuthStubs {
 
+    public static final String VALID_USERNAME = "testuser";
+    public static final String VALID_PASSWORD = "testpass123";
     public static final String VALID_TOKEN = "test-bearer-token-123";
     public static final String INVALID_TOKEN = "wrong-token";
-    private static final String VALID_USERNAME = ConfigReader.get("auth.username");
-    private static final String VALID_PASSWORD = ConfigReader.get("auth.password");
 
             public static void register(WireMockServer wireMock) {
 
-                // Valid credentials (specific JSON path matchers)
+                // Valid credentials — full body match
+                // equalToJson is safe: no injection surface if values have special characters
+                // ignoreArrayOrder=true, ignoreExtraElements=true so future client fields don't break it
                 wireMock.stubFor(post(urlEqualTo("/login"))
                         .atPriority(2)
-                        .withRequestBody(matchingJsonPath(
-                                "$[?(@.username == '" + VALID_USERNAME + "')]"))
-                        .withRequestBody(matchingJsonPath(
-                                "$[?(@.password == '" + VALID_PASSWORD + "')]"))
+                        .withRequestBody(equalToJson(
+                                "{\"username\": \"" + VALID_USERNAME + "\", \"password\": \"" + VALID_PASSWORD + "\"}",
+                                true,  // ignoreArrayOrder
+                                true   // ignoreExtraElements
+                        ))
                         .willReturn(aResponse()
                                 .withStatus(200)
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{ \"token\": \"" + VALID_TOKEN + "\" }")));
 
-                // Catch-all: any login with wrong credentials falls through to here
+                // Catch-all: any login with wrong credentials falls through to here - given leat priority
                 wireMock.stubFor(post(urlEqualTo("/login"))
                         .atPriority(5)
                         .willReturn(aResponse()
