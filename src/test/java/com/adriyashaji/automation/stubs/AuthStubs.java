@@ -29,7 +29,7 @@ public class AuthStubs {
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{ \"token\": \"" + VALID_TOKEN + "\" }")));
 
-                // Catch-all: any login with wrong credentials falls through to here - given leat priority
+                // Catch-all: any login with wrong credentials falls through to here - given least priority
                 wireMock.stubFor(post(urlEqualTo("/login"))
                         .atPriority(5)
                         .willReturn(aResponse()
