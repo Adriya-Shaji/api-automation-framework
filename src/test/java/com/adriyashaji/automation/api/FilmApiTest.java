@@ -81,7 +81,8 @@ public class FilmApiTest extends BaseTest {
               .then()
               .statusCode(201)
               .body("id", notNullValue())
-              .body("title", equalTo("Inception"));
+              .body("title", equalTo("Inception"))
+              .body("year", equalTo(2010));
    }
 
 
@@ -95,6 +96,7 @@ public class FilmApiTest extends BaseTest {
               .when().post("/films")
               .then()
               .statusCode(201)
+              .body("title", equalTo("Dune"))
               .extract().jsonPath().getString("id");
 
       assertThat(id).as("Created film ID should not be null").isNotNull();

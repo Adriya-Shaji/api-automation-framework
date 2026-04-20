@@ -27,13 +27,23 @@ public class FilmStubs {
                 .willReturn(okJson(
                         "{ \"id\": \"2\", \"title\": \"The Dark Knight\", \"director\": \"Christopher Nolan\", \"year\": 2008 }")));
 
+        // Stub for createFilm() — posts Inception
         wireMock.stubFor(post(urlEqualTo("/films"))
-                .withRequestBody(matchingJsonPath("$.title"))
-                .withRequestBody(matchingJsonPath("$.director"))
+                .atPriority(1)
+                .withRequestBody(matchingJsonPath("$[?(@.title == 'Inception')]"))
                 .willReturn(aResponse()
                         .withStatus(201)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"id\": \"4\", \"title\": \"Inception\", \"director\": \"Christopher Nolan\", \"year\": 2017 }")));
+                        .withBody("{ \"id\": \"4\", \"title\": \"Inception\", \"director\": \"Christopher Nolan\", \"year\": 2010 }")));
+
+        // Stub for extractCreatedFilmId() — posts Dune
+        wireMock.stubFor(post(urlEqualTo("/films"))
+                .atPriority(2)
+                .withRequestBody(matchingJsonPath("$[?(@.title == 'Dune')]"))
+                .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"5\", \"title\": \"Dune\", \"director\": \"Denis Villeneuve\", \"year\": 2021 }")));
 
         wireMock.stubFor(put(urlEqualTo("/films/1"))
                 .willReturn(okJson(

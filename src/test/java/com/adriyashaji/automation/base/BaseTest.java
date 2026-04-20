@@ -5,8 +5,9 @@ import com.adriyashaji.automation.stubs.FilmStubs;
 import com.adriyashaji.automation.stubs.UserStubs;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.adriyashaji.automation.utils.ConfigReader;
-import io.restassured.RestAssured;
+import io.restassured.filter.log.LogDetail;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -15,11 +16,9 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.qameta.allure.restassured.AllureRestAssured;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-
 public class BaseTest {
 
-    protected static WireMockServer wireMockServer;
+    private static WireMockServer wireMockServer;
     private static RequestSpecification requestSpec;
 
     protected static RequestSpecification getRequestSpec() {
@@ -30,18 +29,15 @@ public class BaseTest {
     static void setup() {
         wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
         wireMockServer.start();
-        configureFor("localhost", wireMockServer.port());
-
         String baseUrl = "http://localhost:" + wireMockServer.port();
-
-        RestAssured.baseURI = baseUrl;
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
         requestSpec = new RequestSpecBuilder()
                 .setBaseUri(baseUrl)
                 .setContentType(ContentType.JSON)
                 .addHeader("Accept", "application/json")
                 .addFilter(new AllureRestAssured())
+                .addFilter(new RequestLoggingFilter(LogDetail.ALL))
+                .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
                 .build();
 
         setupStubs();
@@ -49,7 +45,9 @@ public class BaseTest {
 
     @AfterAll
     static void teardown() {
-        wireMockServer.stop();
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
     }
 
     private static void setupStubs() {

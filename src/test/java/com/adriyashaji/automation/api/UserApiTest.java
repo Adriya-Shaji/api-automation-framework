@@ -85,14 +85,15 @@ public class UserApiTest extends BaseTest {
     @Tag("smoke")
     @DisplayName("POST create user returns 201 with generated ID")
     void createUser() throws JsonProcessingException {
-        User user = new User("Janet QA", "janetqa", "janet@test.com");
+        User user = new User("Test User", "testuser", "test@example.com");
         given().spec(getRequestSpec())
                 .body(user)
                 .when().post("/users")
                 .then()
                 .statusCode(201)
-                .body("name", equalTo("Janet QA"))
-                .body("id", notNullValue());
+                .body("id", notNullValue())
+                .body("name", equalTo("Test User"))
+                .body("email", equalTo("test@example.com"));
     }
 
 
@@ -100,13 +101,14 @@ public class UserApiTest extends BaseTest {
     @Tag("regression")
     @DisplayName("POST create user and extract generated id")
     void extractCreatedUserId() {
-        User user = new User("Test User", "testuser", "test@test.com");
+        User user = new User("Test User", "testuser", "test@example.com");
 
         String id = given().spec(getRequestSpec())
                 .body(user)
                 .when().post("/users")
                 .then()
                 .statusCode(201)
+                .body("name", equalTo("Test User"))
                 .extract().jsonPath().getString("id");
 
         assertThat(id).isNotNull().isNotBlank();

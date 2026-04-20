@@ -68,6 +68,7 @@ public class DatabaseTest {
 
     @AfterAll
     static  void tearDown() throws SQLException{
-        dbHelper.close();
-    }
+        if (dbHelper != null) {
+            dbHelper.close();
+        }    }
 }
