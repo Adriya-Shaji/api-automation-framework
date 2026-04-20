@@ -40,7 +40,8 @@ public class UserStubs {
                 .willReturn(aResponse()
                         .withStatus(201)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"id\": \"6\", \"name\": \"Janet QA\", \"username\": \"janetqa\", \"email\": \"janet@test.com\" }")));
+                        .withBody("{ \"id\": \"6\", \"name\": \"Test User\", \"username\": \"testuser\", \"email\": \"test@example.com\" }")));
+
         // Priority 2: catch-all for missing or blank fields — drives negative validation tests
         wireMock.stubFor(post(urlEqualTo("/users"))
                 .atPriority(2)
