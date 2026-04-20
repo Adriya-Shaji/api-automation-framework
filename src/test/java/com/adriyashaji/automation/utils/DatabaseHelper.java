@@ -18,8 +18,12 @@ public class DatabaseHelper {
 
     public DatabaseHelper(String url, String user, String password) throws SQLException {
         connection = DriverManager.getConnection(url, user, password);
-        createTestData();
-    }
+        try {
+            createTestData();
+        } catch (SQLException e) {
+            connection.close();
+            throw e;
+        }    }
 
     // Sets up the H2 in-memory table + seed data
     // MERGE = insert if not exists, update if exists
@@ -111,7 +115,7 @@ public class DatabaseHelper {
     }
 
     public void close() throws SQLException {
-        if (connection != null)
+        if (connection != null && !connection.isClosed())
             connection.close();
     }
 }
