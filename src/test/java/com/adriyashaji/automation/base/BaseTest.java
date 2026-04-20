@@ -3,6 +3,7 @@ package com.adriyashaji.automation.base;
 import com.adriyashaji.automation.stubs.AuthStubs;
 import com.adriyashaji.automation.stubs.FilmStubs;
 import com.adriyashaji.automation.stubs.UserStubs;
+import com.adriyashaji.automation.utils.ConfigReader;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.restassured.filter.log.LogDetail;
@@ -27,9 +28,18 @@ public class BaseTest {
 
     @BeforeAll
     static void setup() {
-        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
-        wireMockServer.start();
-        String baseUrl = "http://localhost:" + wireMockServer.port();
+        String mode = System.getProperty("mode", "mock");
+        String baseUrl;
+
+        if ("mock".equals(mode)) {
+            wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
+            wireMockServer.start();
+            setupStubs();
+            baseUrl = "http://localhost:" + wireMockServer.port();
+        } else {
+            wireMockServer = null;
+            baseUrl = ConfigReader.get("base.url");
+        }
 
         requestSpec = new RequestSpecBuilder()
                 .setBaseUri(baseUrl)
@@ -39,13 +49,11 @@ public class BaseTest {
                 .addFilter(new RequestLoggingFilter(LogDetail.ALL))
                 .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
                 .build();
-
-        setupStubs();
     }
 
     @AfterAll
     static void teardown() {
-        if (wireMockServer != null) {
+        if (wireMockServer != null && wireMockServer.isRunning()) {
             wireMockServer.stop();
         }
     }

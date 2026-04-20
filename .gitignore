@@ -26,3 +26,7 @@ Thumbs.db
 
 # File with real credentials for local testing
 local-secrets.propertiessrc/test/resources/config/local.properties
+
+
+repo-mirror/
+repo-mirror.bfg-report/

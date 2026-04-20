@@ -15,6 +15,7 @@
         <wiremock.version>3.3.1</wiremock.version>
         <aspectj.version>1.9.21</aspectj.version>
         <h2.version>2.2.224</h2.version>
+        <excludedGroups>live</excludedGroups>
     </properties>
     <dependencies>
         <dependency>
@@ -85,12 +86,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <argLine>
-                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
-                    </argLine>
+                    <argLine>-javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.21/aspectjweaver-1.9.21.jar"</argLine>
                     <systemPropertyVariables>
-                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                        <allure.results.directory>/Users/adriyashaji/IdeaProjects/api-automation-framework/target/allure-results</allure.results.directory>
                     </systemPropertyVariables>
+                    <excludedGroups>${excludedGroups}</excludedGroups>
                 </configuration>
             </plugin>
             <plugin>
