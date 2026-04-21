@@ -1,39 +1,36 @@
-
 # API Automation Framework
 
-Java-based API test automation framework using Rest Assured and JUnit 5. Tests run across three layers: WireMock-stubbed regression coverage, live contract/smoke tests against a real endpoint, and standalone H2 database validation.
+Java-based API test automation framework built with **Rest Assured** and **JUnit 5** for stubbed regression, live contract testing, and database validation.
+
+
 
 ---
 
-## Tech stack
+## Test Layers
 
-| Component | Version |
-|---|---|
-| Java | 17 |
-| Maven | 3.x |
+- **Stubbed:** deterministic validation of status codes, schema, and auth flows using WireMock
+- **Live:** contract-level validation against `jsonplaceholder.typicode.com`
+- **Database:** H2 in-memory query validation - row counts, field lookups, payment integrity checks, timestamp window assertions
+
+---
+
+## Tech Stack
+
+| Component         | Version |
+|-------------------|---|
+| Java              | 17 |
+| Maven             | 3.x |
 | JUnit 5 (Jupiter) | 5.10.2 |
-| Rest Assured | 5.4.0 |
-| WireMock | 3.3.1 |
-| Allure JUnit 5 | 2.25.0 |
-| Jackson | 2.15.3 |
-| AssertJ | 3.25.3 |
+| Rest Assured      | 5.4.0 |
+| WireMock          | 3.3.1 |
+| Allure JUnit 5    | 2.25.0 |
+| Jackson           | 2.15.3 |
+| AssertJ           | 3.25.3 |
 | H2 (in-memory DB) | 2.2.224 |
- 
+
 ---
 
-## Test layers
-
-| Layer | Classes | What it validates |
-|---|---|---|
-| Stubbed (mock) | `UserApiTest`, `FilmApiTest`, `AuthApiTest` | Status codes, response shape, JSON schema, auth flows — deterministic, no external service |
-| Live contract | `LiveSmokeTest` | Contract shape against `jsonplaceholder.typicode.com` — catches field renames, wrong status codes, removed properties |
-| Database | `DatabaseTest` | Row counts, field values, payment integrity, timestamp window |
-
-Stubbed tests run against WireMock on a dynamic port. Live tests are excluded from the default Maven run and must be explicitly opted in.
- 
----
-
-## Folder structure
+## Project Structure
 
 ```
 api-automation-framework/
@@ -41,55 +38,52 @@ api-automation-framework/
 ├── pom.xml
 └── src/test/
     ├── java/com/adriyashaji/automation/
-    │   ├── api/
+    │   ├── api/                                  # Test classes (stubbed, live, DB)
     │   │   ├── UserApiTest.java
     │   │   ├── FilmApiTest.java
     │   │   ├── AuthApiTest.java
     │   │   ├── LiveSmokeTest.java
     │   │   └── DatabaseTest.java
-    │   ├── base/
+    │   ├── base/                                 # Shared setup
     │   │   └── BaseTest.java
-    │   ├── models/
+    │   ├── models/                               # POJOs
     │   │   ├── User.java
     │   │   └── Film.java
-    │   ├── stubs/
+    │   ├── stubs/                                # WireMock stubs
     │   │   ├── UserStubs.java
     │   │   ├── FilmStubs.java
     │   │   └── AuthStubs.java
-    │   └── utils/
+    │   └── utils/                                # Auth, config, DB helpers
     │       ├── AuthManager.java
     │       ├── ConfigReader.java
     │       └── DatabaseHelper.java
     └── resources/
-        ├── config/
-        │   ├── local.properties.example   # copy to local.properties and fill in values
+        ├── config/                               # Environment configs
+        │   ├── local.properties.example          # copy to local.properties and fill in values
         │   ├── live.properties
         │   ├── staging.properties
         │   └── prod.properties
-        └── schemas/
+        └── schemas/                              # JSON schemas
             ├── user-schema.json
             └── film-schema.json
 ```
  
 ---
 
-## Running tests locally
+## Running Tests
 
-**Prerequisites**
-
+**Prerequisites:**
 - Java 17
 - Maven 3.x
-- Allure CLI — optional, only needed to serve reports locally (`brew install allure` on Mac, or see [Allure docs](https://allurereport.org/docs/install/))
-  **Setup**
+- Allure CLI (optional, for viewing reports locally)
 
-Copy the example config before running anything:
-
+**Setup:**
 ```bash
 cp src/test/resources/config/local.properties.example \
    src/test/resources/config/local.properties
 ```
 
-Default values in the example are sufficient for mock-mode runs. Do not commit `local.properties`.
+Default values are sufficient for mock-mode runs. Do not commit `local.properties`.
 
 **Run all stubbed tests (default)**
 
@@ -105,34 +99,48 @@ mvn clean test -Dgroups=regression
 mvn clean test -Dgroups=database
 ```
 
-**Switch environment**
+**Run with environment**
 
-The `-Denv` flag selects the matching properties file from `src/test/resources/config/`. In mock mode, `base.url` is ignored but credentials and DB config are still loaded from the selected file.
+In mock mode, `base.url` is ignored. Credentials and DB settings are still loaded from the selected config.
 
 ```bash
 mvn clean test -Denv=staging
 ```
 
-**Run live contract tests**
+**Run live tests:**
 
-`-DexcludedGroups=` clears the default `live` exclusion set in `pom.xml`, which is required to allow the live-tagged tests to run.
-
+Live tests are tagged with `live` and excluded by default.
 ```bash
 mvn test -Dmode=live -Denv=live -Dgroups=live -DexcludedGroups=
 ```
 
-**Generate Allure report**
+**Reporting**
 
 ```bash
-# Generate static HTML from a prior test run
 mvn allure:report
- 
-# Serve in browser (requires Allure CLI)
 allure serve target/allure-results
 ```
 
 ---
 ## CI
 
-Jenkins pipeline defined in `Jenkinsfile`. Exposes `ENV` as a choice parameter (`local`, `staging`, `prod`) and `RUN_LIVE_TESTS` as a boolean flag. Allure results are published as a post-stage artifact and JUnit XML is archived on every run.
- 
+The Jenkins pipeline supports:
+
+- `ENV` – choice parameter: `local`, `staging`, or `prod`
+- `RUN_LIVE_TESTS` – boolean parameter to enable or skip live tests
+
+Each run publishes: JUnit XML reports, Allure results
+
+---
+
+## Design decisions
+
+**Stubs separated from live tests.** WireMock tests run in mock mode against a dynamic local port. Live tests run separately against a real endpoint. Mixing them in one layer makes failure diagnosis harder — a flaky live response looks the same as a broken assertion.
+
+**Stub tests assert exact values, live tests assert structure only.** Stubs return fixed data so assertions can be strict (`equalTo("Inception")`). Live responses vary by environment so assertions check field presence and type only, not values.
+
+**Stubs split by domain.** `UserStubs`, `FilmStubs`, `AuthStubs` each own their stub registration. Earlier design had everything in one `setupStubs()` method in `BaseTest` — adding a new domain meant editing a shared base class. Extracting per-domain classes keeps ownership clear.
+
+**Auth credentials resolved via environment variables first.** `AuthManager` checks `AUTH_USERNAME` / `AUTH_PASSWORD` before falling back to config file values. This lets CI inject credentials without committing them to source.
+
+**`-Denv` selects config at runtime.** Switching environments requires no code change — only the properties file changes. `base.url`, credentials, and DB connection all come from the selected config.
