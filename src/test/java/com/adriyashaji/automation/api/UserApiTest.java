@@ -49,7 +49,7 @@ public class UserApiTest extends BaseTest {
                 .when().get("/users/1")
                 .then()
                 .statusCode(200)
-                .body("id", equalTo("1"))
+                .body("id", equalTo(1))
                 .body("email", containsString("@"))
                 .body("name", not(emptyString()));
     }
@@ -103,15 +103,16 @@ public class UserApiTest extends BaseTest {
     void extractCreatedUserId() {
         User user = new User("Test User", "testuser", "test@example.com");
 
-        String id = given().spec(getRequestSpec())
+        int id = given().spec(getRequestSpec())
                 .body(user)
                 .when().post("/users")
                 .then()
                 .statusCode(201)
                 .body("name", equalTo("Test User"))
-                .extract().jsonPath().getString("id");
+                .extract().jsonPath().getInt("id");
 
-        assertThat(id).isNotNull().isNotBlank();
+        //confirms it's a real generated ID
+        assertThat(id).isPositive();
     }
 
     @Test
@@ -139,7 +140,7 @@ public class UserApiTest extends BaseTest {
                 .when().put("/users/1")
                 .then().statusCode(200)
                 .body("name", equalTo("Janet Updated"))
-                .body("id", equalTo("1"));
+                .body("id", equalTo(1));
     }
 
     @Test
