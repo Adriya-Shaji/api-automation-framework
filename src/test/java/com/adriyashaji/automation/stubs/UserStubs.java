@@ -10,21 +10,21 @@ public class UserStubs {
 
         wireMock.stubFor(get(urlEqualTo("/users"))
                 .willReturn(okJson("[" +
-                        "{ \"id\": \"1\", \"name\": \"Leanne Graham\", \"username\": \"Bret\", \"email\": \"sincere@april.biz\" }," +
-                        "{ \"id\": \"2\", \"name\": \"Ervin Howell\", \"username\": \"Antonette\", \"email\": \"shanna@melissa.tv\" }," +
-                        "{ \"id\": \"3\", \"name\": \"Clementine Bauch\", \"username\": \"Samantha\", \"email\": \"nathan@yesenia.net\" }," +
-                        "{ \"id\": \"4\", \"name\": \"Patricia Lebsack\", \"username\": \"Karianne\", \"email\": \"julianne@kory.org\" }," +
-                        "{ \"id\": \"5\", \"name\": \"Chelsey Dietrich\", \"username\": \"Kamren\", \"email\": \"lucio@annie.ca\" }" +
+                        "{ \"id\": 1, \"name\": \"Leanne Graham\", \"username\": \"Bret\", \"email\": \"sincere@april.biz\" }," +
+                        "{ \"id\": 2, \"name\": \"Ervin Howell\", \"username\": \"Antonette\", \"email\": \"shanna@melissa.tv\" }," +
+                        "{ \"id\": 3, \"name\": \"Clementine Bauch\", \"username\": \"Samantha\", \"email\": \"nathan@yesenia.net\" }," +
+                        "{ \"id\": 4, \"name\": \"Patricia Lebsack\", \"username\": \"Karianne\", \"email\": \"julianne@kory.org\" }," +
+                        "{ \"id\": 5, \"name\": \"Chelsey Dietrich\", \"username\": \"Kamren\", \"email\": \"lucio@annie.ca\" }" +
                         "]")));
 
         wireMock.stubFor(get(urlEqualTo("/users/1"))
-                .willReturn(okJson("{ \"id\": \"1\", \"name\": \"Leanne Graham\", \"username\": \"Bret\", \"email\": \"sincere@april.biz\" }")));
+                .willReturn(okJson("{ \"id\": 1, \"name\": \"Leanne Graham\", \"username\": \"Bret\", \"email\": \"sincere@april.biz\" }")));
 
         wireMock.stubFor(get(urlEqualTo("/users/2"))
-                .willReturn(okJson("{ \"id\": \"2\", \"name\": \"Ervin Howell\", \"username\": \"Antonette\", \"email\": \"shanna@melissa.tv\" }")));
+                .willReturn(okJson("{ \"id\": 2, \"name\": \"Ervin Howell\", \"username\": \"Antonette\", \"email\": \"shanna@melissa.tv\" }")));
 
         wireMock.stubFor(get(urlEqualTo("/users/3"))
-                .willReturn(okJson("{ \"id\": \"3\", \"name\": \"Clementine Bauch\", \"username\": \"Samantha\", \"email\": \"nathan@yesenia.net\" }")));
+                .willReturn(okJson("{ \"id\": 3, \"name\": \"Clementine Bauch\", \"username\": \"Samantha\", \"email\": \"nathan@yesenia.net\" }")));
 
         // Negative path — verify 404 handling, not just happy path
         wireMock.stubFor(get(urlEqualTo("/users/9999"))
@@ -40,7 +40,7 @@ public class UserStubs {
                 .willReturn(aResponse()
                         .withStatus(201)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"id\": \"6\", \"name\": \"Test User\", \"username\": \"testuser\", \"email\": \"test@example.com\" }")));
+                        .withBody("{ \"id\": 6, \"name\": \"Test User\", \"username\": \"testuser\", \"email\": \"test@example.com\" }")));
 
         // Priority 2: catch-all for missing or blank fields — drives negative validation tests
         wireMock.stubFor(post(urlEqualTo("/users"))
@@ -52,7 +52,7 @@ public class UserStubs {
                         .withBody("{ \"error\": \"name, username and email are required\" }")));
 
         wireMock.stubFor(put(urlEqualTo("/users/1"))
-                .willReturn(okJson("{ \"id\": \"1\", \"name\": \"Janet Updated\", \"username\": \"janetupdated\", \"email\": \"janet.updated@test.com\" }")));
+                .willReturn(okJson("{ \"id\": 1, \"name\": \"Janet Updated\", \"username\": \"janetupdated\", \"email\": \"janet.updated@test.com\" }")));
 
         wireMock.stubFor(delete(urlEqualTo("/users/1"))
                 .willReturn(aResponse().withStatus(200)));
