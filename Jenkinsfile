@@ -19,11 +19,6 @@ pipeline {
         )
     }
 
-    environment {
-        AUTH_USERNAME = credentials('auth-username')
-        AUTH_PASSWORD = credentials('auth-password')
-    }
-
     stages {
         stage('Checkout') {
             steps {
