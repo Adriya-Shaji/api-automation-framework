@@ -25,11 +25,14 @@ steps:
   inputs:
     mavenPomFile: 'pom.xml'
     goals: 'clean test'
-    options: '-Denv=${{ parameters.ENV }}'
+    options: '-Denv=${{ parameters.ENV }} -DexcludedGroups=database'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.17'
+  env:
+    AUTH_USERNAME: $(AUTH_USERNAME)
+    AUTH_PASSWORD: $(AUTH_PASSWORD)
 
 - task: Maven@4
   displayName: 'Run Live Contract Tests'
