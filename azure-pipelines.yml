@@ -20,7 +20,7 @@ parameters:
   default: false
 
 steps:
-- task: Maven@3
+- task: Maven@4
   displayName: 'Run Tests'
   inputs:
     mavenPomFile: 'pom.xml'
@@ -31,7 +31,7 @@ steps:
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.17'
 
-- task: Maven@3
+- task: Maven@4
   displayName: 'Run Live Contract Tests'
   condition: eq(${{ parameters.RUN_LIVE_TESTS }}, true)
   inputs:
