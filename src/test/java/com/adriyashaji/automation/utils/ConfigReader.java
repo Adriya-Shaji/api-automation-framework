@@ -35,7 +35,19 @@ public class ConfigReader {
     }
 
     public static String get(String key) {
+        // 1. Check properties file first
         String value = properties.getProperty(key);
+
+        // 2. Fall back to system property (-D flags)
+        if (value == null) {
+            value = System.getProperty(key);
+        }
+
+        // 3. Fall back to environment variable
+        if (value == null) {
+            value = System.getenv(key.toUpperCase().replace(".", "_"));
+        }
+
         if (value == null) {
             throw new RuntimeException(
                     "Property '" + key + "' not found in active config file."

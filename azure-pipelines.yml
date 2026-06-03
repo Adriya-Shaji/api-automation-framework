@@ -5,15 +5,6 @@ pool:
   vmImage: ubuntu-latest
 
 parameters:
-- name: ENV
-  displayName: Target Environment
-  type: string
-  default: staging
-  values:
-  - local
-  - staging
-  - prod
-
 - name: RUN_LIVE_TESTS
   displayName: Run Live Contract Tests
   type: boolean
@@ -25,7 +16,7 @@ steps:
   inputs:
     mavenPomFile: 'pom.xml'
     goals: 'clean test'
-    options: '-Denv=${{ parameters.ENV }} -DexcludedGroups=database'
+    options: '-Denv=ci'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     javaHomeOption: 'JDKVersion'
