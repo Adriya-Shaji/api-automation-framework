@@ -1,0 +1,44 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+parameters:
+- name: ENV
+  displayName: Target Environment
+  type: string
+  default: staging
+  values:
+  - local
+  - staging
+  - prod
+
+- name: RUN_LIVE_TESTS
+  displayName: Run Live Contract Tests
+  type: boolean
+  default: false
+
+steps:
+- task: Maven@3
+  displayName: 'Run Tests'
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'clean test'
+    options: '-Denv=${{ parameters.ENV }}'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.17'
+
+- task: Maven@3
+  displayName: 'Run Live Contract Tests'
+  condition: eq(${{ parameters.RUN_LIVE_TESTS }}, true)
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'test'
+    options: '-Dmode=live -Denv=live -Dgroups=live -DexcludedGroups='
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.17'
