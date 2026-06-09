@@ -1,38 +1,30 @@
 trigger:
-- main
+  - main
 
 pool:
   vmImage: ubuntu-latest
 
 parameters:
-- name: RUN_LIVE_TESTS
-  displayName: Run Live Contract Tests
-  type: boolean
-  default: false
+  - name: RUN_LIVE_TESTS
+    displayName: Run Live Contract Tests
+    type: boolean
+    default: false
 
-steps:
-- task: Maven@4
-  displayName: 'Run Tests'
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'clean test'
-    options: '-Denv=ci'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.17'
-  env:
-    AUTH_USERNAME: $(AUTH_USERNAME)
-    AUTH_PASSWORD: $(AUTH_PASSWORD)
+jobs:
+  - job: api_test
+    displayName: 'API Tests'
+    steps:
+      - task: Maven@4
+        displayName: 'Run Tests'
+        inputs:
+          mavenPomFile: 'pom.xml'
+          goals: 'clean test'
+          options: '-Denv=ci'
+          publishJunitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          javaHomeOption: 'JDKVersion'
+          jdkVersionOption: '1.17'
+        env:
+          AUTH_USERNAME: $(AUTH_USERNAME)
+          AUTH_PASSWORD: $(AUTH_PASSWORD)
 
-- task: Maven@4
-  displayName: 'Run Live Contract Tests'
-  condition: eq(${{ parameters.RUN_LIVE_TESTS }}, true)
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'test'
-    options: '-Dmode=live -Denv=live -Dgroups=live -DexcludedGroups='
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.17'
