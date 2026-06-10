@@ -4,6 +4,9 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  - group: api-automation-secrets
+
 parameters:
   - name: RUN_LIVE_TESTS
     displayName: Run Live Contract Tests
