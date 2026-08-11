@@ -35,6 +35,7 @@ Java-based API test automation framework built with **Rest Assured** and **JUnit
 ```
 api-automation-framework/
 ├── Jenkinsfile
+├── azure-pipelines.yml
 ├── pom.xml
 └── src/test/
     ├── java/com/adriyashaji/automation/
@@ -124,12 +125,24 @@ allure serve target/allure-results
 ---
 ## CI
 
-The Jenkins pipeline supports:
+Two pipelines, both running the same Maven commands.
 
-- `ENV` – choice parameter: `local`, `staging`, or `prod`
-- `RUN_LIVE_TESTS` – boolean parameter to enable or skip live tests
+**Azure DevOps** (`azure-pipelines.yml`) — triggers on push to `main`.
 
-Each run publishes: JUnit XML reports, Allure results
+- `api_test` job: `mvn clean test -Denv=ci`, publishes JUnit XML
+- `live_contract_test` job: gated behind the `RUN_LIVE_TESTS` parameter and
+  `dependsOn: api_test`, so live tests only run if the stubbed suite passed
+- Credentials come from the `api-automation-secrets` variable group, injected as
+  `AUTH_USERNAME` / `AUTH_PASSWORD`
+
+**Jenkins** (`Jenkinsfile`) - manual trigger
+
+- `ENV` picks the config (local, staging, prod)
+- `RUN_LIVE_TESTS` - turns the live stage on
+- Publishes JUnit XML and Allure in `post { always }` so failures are still
+  reported
+
+Allure is Jenkins-only at the moment. Azure publishes JUnit XML only.
 
 ---
 
@@ -144,3 +157,8 @@ Each run publishes: JUnit XML reports, Allure results
 **Auth credentials resolved via environment variables first.** `AuthManager` checks `AUTH_USERNAME` / `AUTH_PASSWORD` before falling back to config file values. This lets CI inject credentials without committing them to source.
 
 **`-Denv` selects config at runtime.** Switching environments requires no code change — only the properties file changes. `base.url`, credentials, and DB connection all come from the selected config.
+
+**Credentials come from the environment, not the repo. AuthManager reads
+`AUTH_USERNAME` and `AUTH_PASSWORD` before falling back to the config file.
+Azure supplies them from a variable group, Jenkins from a credentials binding.
+Same code path in both, no conditional.**
